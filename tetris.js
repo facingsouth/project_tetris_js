@@ -2,14 +2,38 @@ var model = {
   activeCells: [],
   placedCells: [],
 
-  Cell: function(){
-    this.x = Math.floor(Math.random() * view.boardWidth/view.cellWidth)
-    this.y = -1;
+  Cell: function(x, y){
+    this.x = x;//Math.floor(Math.random() * view.boardWidth/view.cellWidth)
+    this.y = y;
     model.activeCells.push(this);
   },
 
+  // Piece: function(type, x, y) {
+  //   shapes: {
+  //     0: square,
+  //     1: bar,
+  //     2: leftL,
+  //     3: rightL,
+  //     4: leftS,
+  //     5: rightS
+  //   },
+
+  //   this.x: x;
+  //   this.y: y;
+
+  // },
+
+  squareFactory: function() {
+    new model.Cell(5, -1);
+    new model.Cell(6, -1);
+    new model.Cell(5, -2);
+    new model.Cell(6, -2);
+  },
+
+
+
   makeNewCell: function(){
-    if (model.activeCells.length === 0) { new model.Cell() }
+    if (model.activeCells.length === 0) { new model.Cell(Math.floor(Math.random() * view.boardWidth/view.cellWidth), -1) }
   },
 
   jumpDown: function(){
@@ -25,6 +49,15 @@ var model = {
 
     }
     model.checkCells()
+  },
+
+  movePlacedCellsDown: function(){
+    for (i = 0; i < model.placedCells.length; i++){
+      cell = model.placedCells[i]
+      if (cell.y < (view.boardHeight/view.cellWidth) - 1) {
+        cell.y++;
+      }
+    }
   },
 
   stopPiece: function(){
@@ -64,7 +97,8 @@ var model = {
       }
 
       if (count == 10){
-        model.clearRow(row)
+        model.clearRow(row);
+        model.movePlacedCellsDown();
       }
     }
   },
@@ -80,11 +114,19 @@ var model = {
   },
 
   clearRow: function(row){
-    console.log("clearing")
-    for (i = 0; i < model.placedCells.length; i++){
-      cell = model.placedCells[i]
-      if (cell.y == row){
-        model.placedCells.splice(i,1)
+    // console.log("clearing")
+    // for (i = 0; i < model.placedCells.length; i++){
+    //   cell = model.placedCells[i]
+    //   if (cell.y == row){
+    //     model.placedCells.splice(i,1)
+    //   }
+    // }
+    var i = 0;
+    while (model.placedCells[i]) {
+      if (model.placedCells[i].y == row){
+        model.placedCells.splice(i,1);
+      } else {
+        i++;
       }
     }
   },
@@ -107,6 +149,7 @@ var controller = {
 
   gravity: function(){
     model.moveCellsDown();
+    model.checkCells();
   },
 
 
@@ -188,6 +231,6 @@ controller.init();
 setInterval(function(){
   view.resetCanvas();
   controller.gravity();
-  model.checkCells()
-  model.makeNewCell();
+  // model.squareFactory();
+  // model.makeNewCell();
 }, 200)
