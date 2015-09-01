@@ -8,18 +8,30 @@ var model = {
     model.activeCells.push(this);
   },
 
+  makeNewCell: function(){
+    if (model.activeCells.length === 0) { new model.Cell() }
+  },
+
+  jumpDown: function(){
+    do {model.moveCellsDown()} while (model.activeCells.length > 0)
+
+
+  },
+
   moveCellsDown: function(){
     for (i = 0; i < model.activeCells.length; i++){
       cell = model.activeCells[i]
       cell.y++
-      view.drawCell(cell.x, cell.y)
+
     }
+    model.checkCells()
   },
 
   stopPiece: function(){
     console.log("stopping!")
     model.placedCells = model.placedCells.concat(model.activeCells)
     model.activeCells = []
+    model.checkRow();
   },
 
   checkCells: function(){
@@ -41,6 +53,22 @@ var model = {
     return false;
   },
 
+  checkRow: function(){
+    for(var row= 19; row>=0 ; row--){
+      var count = 0
+      for (var idx = 0; idx < model.placedCells.length; idx++){
+        var cell = model.placedCells[idx];
+        if (cell.y == row){
+          count++
+        }
+      }
+
+      if (count == 10){
+        model.clearRow(row)
+      }
+    }
+  },
+
   checkSideCells: function(currentCell, nextX) {
     for (var i = model.placedCells.length - 1; i >= 0; i--) {
       var nextCell = model.placedCells[i];
@@ -51,18 +79,15 @@ var model = {
     return false;
   },
 
-  deleteCells: function(row){
-    for (i = 0; i < model.activeCells.length; i++){
+  clearRow: function(row){
+    console.log("clearing")
+    for (i = 0; i < model.placedCells.length; i++){
       cell = model.placedCells[i]
       if (cell.y == row){
-        model.activeCells.splice(i,1)
+        model.placedCells.splice(i,1)
       }
     }
   },
-  /*
-  if cell reaches bottom OR placed cell, then
-  stopCell -> move cell from ActiveCells to PlacedCells
-   */
 
 
 }
@@ -70,7 +95,8 @@ var model = {
 var controller = {
   userMove: {
     37: -1,
-    39: 1
+    39: 1,
+    40: "down"
   },
 
   init: function(){
@@ -83,6 +109,7 @@ var controller = {
     model.moveCellsDown();
   },
 
+
   movePiece: function(event){
     if (event.which == 37 || event.which == 39){
       for (var i=0; i<model.activeCells.length; i++) {
@@ -94,6 +121,10 @@ var controller = {
       };
       view.resetCanvas();
       view.drawPiece();
+    }
+
+    if (event.which == 40){
+      model.jumpDown()
     }
   }
 }
@@ -125,6 +156,7 @@ var view = {
     }
 
     view.drawPlacedCells();
+    view.drawPiece();
   },
 
   drawPlacedCells: function(){
@@ -136,7 +168,8 @@ var view = {
   drawCell: function(x, y) {
     this.context.fillStyle = "#ABCDEF";
     this.context.fillRect(x*this.cellWidth, y*this.cellWidth, this.cellWidth, this.cellWidth);
-  }, 
+    this.context. strokeRect(x*this.cellWidth, y*this.cellWidth, this.cellWidth, this.cellWidth);
+  },
 
   drawPiece: function() {
     for (var i = model.activeCells.length - 1; i >= 0; i--) {
@@ -156,4 +189,5 @@ setInterval(function(){
   view.resetCanvas();
   controller.gravity();
   model.checkCells()
+  model.makeNewCell();
 }, 200)
