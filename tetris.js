@@ -184,7 +184,7 @@ var model = {
   },
 
   stopPiece: function(){
-    console.log("stopping!")
+    // console.log("stopping!")
     model.placedCells = model.placedCells.concat(model.activeCells)
     model.activeCells = []
     model.checkRow();
