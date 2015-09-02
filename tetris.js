@@ -29,9 +29,8 @@ var model = {
     var factories = [model.squareFactory, model.barFactory, model.rightLFactory,
                 model.leftLFactory, model.leftSFactory, model.rightSFactory]
 
+    model.angle = 0
     var rand = Math.floor(Math.random()*6)
-
-    // model.currentPiece = factories[rand];
 
    return factories[rand]
   },
@@ -43,7 +42,6 @@ var model = {
   pieceFactory: function(x,y,rotatedCoords){
 
     if (model.activeCells.length === 0){
-      model.angle = 0;
       new model.Cell( x , y);
       new model.Cell(x+rotatedCoords[0][0], y+rotatedCoords[0][1]);
       new model.Cell(x+rotatedCoords[1][0], y+rotatedCoords[1][1]);
@@ -52,13 +50,13 @@ var model = {
   },
 
 
-  getRotatedCoordinates: function(coords, angle){
+  getRotatedCoordinates: function(coords){
 
       var rotatedCoords = [[],[],[]]
 
       for (var i = 0; i < coords.length; i++) {
-        rotatedCoords[i][0] = coords[i][0]*Math.cos(angle) - coords[i][1]*Math.sin(angle);
-        rotatedCoords[i][1] = coords[i][0]*Math.sin(angle) + coords[i][1]*Math.cos(angle);
+        rotatedCoords[i][0] = coords[i][0]*Math.cos(model.angle) - coords[i][1]*Math.sin(model.angle);
+        rotatedCoords[i][1] = coords[i][0]*Math.sin(model.angle) + coords[i][1]*Math.cos(model.angle);
         rotatedCoords[i][0] = Math.round(rotatedCoords[i][0]);
         rotatedCoords[i][1] = Math.round(rotatedCoords[i][1]);
         };
@@ -71,16 +69,18 @@ var model = {
 
       var coords = [[1, 0], [0, -1], [1, -1]]
 
-      var rotatedCoords = model.getRotatedCoordinates(coords)
+      var rotatedCoords = model.getRotatedCoordinates(coords);
+      model.currentPiece = model.squareFactory;
       model.pieceFactory(x,y,rotatedCoords)
 
     },
 
-  barFactory: function(x,y,angle) {
+  barFactory: function(x,y) {
 
       var coords = [[0, -1], [0, -2], [0, -3]]
 
-      var rotatedCoords = model.getRotatedCoordinates(coords, angle)
+      var rotatedCoords = model.getRotatedCoordinates(coords)
+      model.currentPiece = model.barFactory;
       model.pieceFactory(x,y,rotatedCoords)
 
   },
@@ -102,8 +102,13 @@ var model = {
     // }
   },
 
-  rightLFactory: function() {
+  rightLFactory: function(x,y,angle) {
 
+    var coords = [[0, -1], [0, -2], [1, 0]]
+
+    var rotatedCoords = model.getRotatedCoordinates(coords);
+    model.currentPiece = model.rightLFactory;
+    model.pieceFactory(x,y,rotatedCoords)
 
 
     // if (model.activeCells.length === 0){
@@ -114,24 +119,38 @@ var model = {
     // }
   },
 
-  leftSFactory: function() {
+  leftSFactory: function(x,y,angle) {
 
-    if (model.activeCells.length === 0){
-      new model.Cell(4, -1);
-      new model.Cell(5, -1);
-      new model.Cell(5, -2);
-      new model.Cell(6, -2);
-    }
+    var coords = [[-1, 0], [0, -1], [-1, -1]]
+
+    var rotatedCoords = model.getRotatedCoordinates(coords);
+    model.currentPiece = model.leftSFactory;
+    model.pieceFactory(x,y,rotatedCoords)
+
+
+
+    // if (model.activeCells.length === 0){
+    //   new model.Cell(4, -1);
+    //   new model.Cell(5, -1); // base
+    //   new model.Cell(5, -2);
+    //   new model.Cell(6, -2);
+    // }
   },
 
-  rightSFactory: function() {
+  rightSFactory: function(x,y,angle) {
 
-    if (model.activeCells.length === 0){
-      new model.Cell(5, -1);
-      new model.Cell(6, -1);
-      new model.Cell(6, -2);
-      new model.Cell(7, -2);
-    }
+    var coords = [[-1, 0], [0, -1], [1, -1]]
+
+    var rotatedCoords = model.getRotatedCoordinates(coords);
+    model.currentPiece = model.rightSFactory;
+    model.pieceFactory(x,y,rotatedCoords)
+
+    // if (model.activeCells.length === 0){
+    //   new model.Cell(5, -1);
+    //   new model.Cell(6, -1); // base
+    //   new model.Cell(6, -2);
+    //   new model.Cell(7, -2);
+    // }
   },
 
 
@@ -371,6 +390,5 @@ controller.init();
 setInterval(function(){
   view.resetCanvas();
   controller.gravity();
-  // model.randomFactory()();
-  // model.makeNewCell();
+  if (model.activeCells.length == 0) model.randomFactory()(5,-1,0);
 }, 1000)
