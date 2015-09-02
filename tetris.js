@@ -263,11 +263,13 @@ var model = {
     }
   },
 
-  rotatePiece: function() {
+  rotatePiece: function(direction) {
+    if (typeof(direction)==='undefined') direction = Math.PI/2;
     model.angle += Math.PI / 2;
     currentPos = [model.activeCells[0].x, model.activeCells[0].y];
     model.activeCells = [];
     model.currentPiece(currentPos[0], currentPos[1], model.angle);
+    controller.checkOutOfBounds();
   }
 
 
@@ -296,6 +298,22 @@ var controller = {
       cell = model.activeCells[i]
       cell.x += direction;
     }
+  },
+
+  checkOutOfBounds: function(){
+    for (var i = 0; i < model.activeCells.length; i++) {
+      cell = model.activeCells[i]
+      if(cell.x < 0){
+       model.rotatePiece(-Math.PI/2)
+       console.log("INVALID ROATION")
+       return
+      } else if (cell.x > 9) {
+        model.rotatePiece(-Math.PI/2)
+        console.log("INVALID ROATION")
+
+        return
+      }
+    };
   },
 
 
