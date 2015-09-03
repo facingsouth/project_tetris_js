@@ -1,8 +1,24 @@
 var model = {
-  activeCells: [],
-  placedCells: [],
-  angle: 0,
+  activeCells:  undefined,
+  placedCells:  undefined,
+  angle:        undefined,
   currentPiece: undefined,
+
+
+
+  pieces: {    square: [[1, 0], [0, -1], [1, -1]],
+               bar:    [[0, -1], [0, -2], [0, -3]],
+               leftL:  [[0, -1], [0, -2], [-1, 0]],
+               rightL: [[0, -1], [0, -2], [1, 0]],
+               leftS:  [[-1, 0], [0, -1], [-1, -1]],
+               rightS: [[-1, 0], [0, -1], [1, -1]]
+               },
+
+  init: function(){
+    model.activeCells = [];
+    model.placedCells = [];
+    model.angle = 0;
+  },
 
   Cell: function(x, y){
     this.x = x;//Math.floor(Math.random() * view.boardWidth/view.cellWidth)
@@ -10,36 +26,23 @@ var model = {
     model.activeCells.push(this);
   },
 
-  // Piece: function(type, x, y) {
-  //   shapes: {
-  //     0: square,
-  //     1: bar,
-  //     2: leftL,
-  //     3: rightL,
-  //     4: leftS,
-  //     5: rightS
-  //   },
+  randomFactory: function(x,y,angle){
+    model.angle = angle
+    var randType = model.pickRandomKey(model.pieces)
 
-  //   this.x: x;
-  //   this.y: y;
-
-  // },
-  //
-  randomFactory: function(){
-    var factories = [model.squareFactory, model.barFactory, model.rightLFactory,
-                model.leftLFactory, model.leftSFactory, model.rightSFactory]
-
-    model.angle = 0
-    var rand = Math.floor(Math.random()*6)
-
-   return factories[rand]
+   return model.pieceFactory(x,y,angle,randType)
   },
 
-  getRelativeCoordinates: function(activeCells){
-    base = activeCells[0]
+  pickRandomKey: function(obj) {
+    var result;
+    var count = 0;
+    for (var key in obj)
+      if (Math.random() < 1/++count)
+       result = key;
+    return result;
   },
 
-  pieceFactory: function(x,y,rotatedCoords){
+  cellsFactory: function(x,y,rotatedCoords){
 
     if (model.activeCells.length === 0){
       new model.Cell( x , y);
@@ -49,142 +52,54 @@ var model = {
     }
   },
 
-
   getRotatedCoordinates: function(coords){
 
       var rotatedCoords = [[],[],[]]
 
       for (var i = 0; i < coords.length; i++) {
-        rotatedCoords[i][0] = coords[i][0]*Math.cos(model.angle) - coords[i][1]*Math.sin(model.angle);
-        rotatedCoords[i][1] = coords[i][0]*Math.sin(model.angle) + coords[i][1]*Math.cos(model.angle);
+        rotatedCoords[i][0] = coords[i][0]*Math.cos(model.angle) -
+        coords[i][1]*Math.sin(model.angle);
+
+        rotatedCoords[i][1] = coords[i][0]*Math.sin(model.angle) +
+        coords[i][1]*Math.cos(model.angle);
+
         rotatedCoords[i][0] = Math.round(rotatedCoords[i][0]);
         rotatedCoords[i][1] = Math.round(rotatedCoords[i][1]);
         };
-
         return rotatedCoords
-
     },
 
-  squareFactory: function(x,y,angle) {
-
-      var coords = [[1, 0], [0, -1], [1, -1]]
-
-      var rotatedCoords = model.getRotatedCoordinates(coords);
-      model.currentPiece = model.squareFactory;
-      model.pieceFactory(x,y,rotatedCoords)
-
-    },
-
-  barFactory: function(x,y) {
-
-      var coords = [[0, -1], [0, -2], [0, -3]]
-
-      var rotatedCoords = model.getRotatedCoordinates(coords)
-      model.currentPiece = model.barFactory;
-      model.pieceFactory(x,y,rotatedCoords)
-
-  },
-
-  leftLFactory: function(x,y,angle) {
-
-    var coords = [[0, -1], [0, -2], [-1, 0]]
-
-    var rotatedCoords = model.getRotatedCoordinates(coords, angle)
-    model.currentPiece = model.leftLFactory;
-    model.pieceFactory(x,y,rotatedCoords)
-
-
-    // if (model.activeCells.length === 0){
-    //   new model.Cell(5, -1);
-    //   new model.Cell(5, -2);
-    //   new model.Cell(5, -3);
-    //   new model.Cell(4, -1);
-    // }
-  },
-
-  rightLFactory: function(x,y,angle) {
-
-    var coords = [[0, -1], [0, -2], [1, 0]]
+  pieceFactory: function(x,y,angle,type){
+    var coords = model.pieces[type]
 
     var rotatedCoords = model.getRotatedCoordinates(coords);
-    model.currentPiece = model.rightLFactory;
-    model.pieceFactory(x,y,rotatedCoords)
-
-
-    // if (model.activeCells.length === 0){
-    //   new model.Cell(5, -1);
-    //   new model.Cell(5, -2);
-    //   new model.Cell(5, -3);
-    //   new model.Cell(6, -1);
-    // }
+    model.currentPiece = type
+    model.cellsFactory(x,y,rotatedCoords)
   },
 
-  leftSFactory: function(x,y,angle) {
-
-    var coords = [[-1, 0], [0, -1], [-1, -1]]
-
-    var rotatedCoords = model.getRotatedCoordinates(coords);
-    model.currentPiece = model.leftSFactory;
-    model.pieceFactory(x,y,rotatedCoords)
-
-
-
-    // if (model.activeCells.length === 0){
-    //   new model.Cell(4, -1);
-    //   new model.Cell(5, -1); // base
-    //   new model.Cell(5, -2);
-    //   new model.Cell(6, -2);
-    // }
-  },
-
-  rightSFactory: function(x,y,angle) {
-
-    var coords = [[-1, 0], [0, -1], [1, -1]]
-
-    var rotatedCoords = model.getRotatedCoordinates(coords);
-    model.currentPiece = model.rightSFactory;
-    model.pieceFactory(x,y,rotatedCoords)
-
-    // if (model.activeCells.length === 0){
-    //   new model.Cell(5, -1);
-    //   new model.Cell(6, -1); // base
-    //   new model.Cell(6, -2);
-    //   new model.Cell(7, -2);
-    // }
-  },
-
-
-
-  makeNewCell: function(){
-    if (model.activeCells.length === 0) { new model.Cell(Math.floor(Math.random() * view.boardWidth/view.cellWidth), -1) }
-  },
+  // makeNewCell: function(){
+  //   if (model.activeCells.length === 0)
+  //   { new model.Cell(Math.floor(Math.random() * view.boardWidth/view.cellWidth), -1) }
+  // },
 
   jumpDown: function(){
-    do {model.moveCellsDown()} while (model.activeCells.length > 0)
-
-
+    do {model.moveCellsDown(); model.checkCells() } while (model.activeCells.length > 0)
   },
 
   moveCellsDown: function(){
     for (i = 0; i < model.activeCells.length; i++){
-      cell = model.activeCells[i]
-      cell.y++
-
+      model.activeCells[i].y++
     }
-    model.checkCells()
   },
 
   movePlacedCellsDown: function(row){
     for (i = 0; i < model.placedCells.length; i++){
-      cell = model.placedCells[i]
-      if (cell.y < row) {
-        cell.y++;
-      }
+      var cell = model.placedCells[i]
+      if (cell.y < row) cell.y++;
     }
   },
 
   stopPiece: function(){
-    // console.log("stopping!")
     model.placedCells = model.placedCells.concat(model.activeCells)
     model.activeCells = []
     model.checkRow();
@@ -192,7 +107,7 @@ var model = {
 
   checkCells: function(){
     for (i = 0; i < model.activeCells.length; i++){
-      cell = model.activeCells[i]
+      var cell = model.activeCells[i]
       if (cell.y == (view.boardHeight/view.cellWidth) - 1 || model.checkBelowCells(cell)){
        model.stopPiece();
       }
@@ -211,26 +126,24 @@ var model = {
 
   checkRow: function(){
     var rowsToClear = []
-    for(var row= 19; row>=0 ; row--){
+    for(var row= 19; row >= -1 ; row--){
       var count = 0
       for (var idx = 0; idx < model.placedCells.length; idx++){
         var cell = model.placedCells[idx];
         if (cell.y == row){
           count++
         }
+        else if (cell.y == -1) controller.isGameOver = true
       }
       if (count == 10){
         rowsToClear.push(row)
-        console.log("going to clear row " + row)
       }
     }
     for (var i = 0; i < rowsToClear.length; i++) {
       model.clearRow(rowsToClear[i]);
-      console.log("cleared row "+ rowsToClear[i])
     };
     for (var i = 0; i < rowsToClear.length; i++) {
       model.movePlacedCellsDown(rowsToClear[i])
-      console.log("moved rows down above row "+ rowsToClear[i])
     };
 
   },
@@ -246,13 +159,6 @@ var model = {
   },
 
   clearRow: function(row){
-    // console.log("clearing")
-    // for (i = 0; i < model.placedCells.length; i++){
-    //   cell = model.placedCells[i]
-    //   if (cell.y == row){
-    //     model.placedCells.splice(i,1)
-    //   }
-    // }
     var i = 0;
     while (model.placedCells[i]) {
       if (model.placedCells[i].y == row){
@@ -268,27 +174,65 @@ var model = {
     model.angle += Math.PI / 2;
     currentPos = [model.activeCells[0].x, model.activeCells[0].y];
     model.activeCells = [];
-    model.currentPiece(currentPos[0], currentPos[1], model.angle);
-    controller.checkOutOfBounds();
+    model.pieceFactory(currentPos[0],currentPos[1], model.angle, model.currentPiece)
+    model.checkOutOfBounds();
   },
 
-  moveSideway: function(direction) {
-    var eligibleToMove = true;
+  checkOutOfBounds: function(){
+    for (var i = 0; i < model.activeCells.length; i++) {
+      cell = model.activeCells[i]
+      if(cell.x < 0){
+       model.rotatePiece(-Math.PI/2)
+       return
+      } else if (cell.x > 9) {
+        model.rotatePiece(-Math.PI/2)
+        return
+      }
+    };
+  },
+
+  checkEligibleToMove: function(direction){
     for (var i=0; i<model.activeCells.length; i++) {
       var cell = model.activeCells[i];
       var nextX = cell.x + direction;
       if ((nextX < 0 || nextX > view.boardWidth/view.cellWidth - 1) || model.checkSideCells(cell, nextX)) {
-        eligibleToMove = false
+        return false
       }
-    };
+    }
+    return true
+  },
 
-    if (eligibleToMove){
-      controller.movePiece(direction)
+  movePiece: function(direction){
+    for (var i = model.activeCells.length - 1; i >= 0; i--) {
+      cell = model.activeCells[i]
+      cell.x += direction;
+    }
+  },
+
+  moveSideway: function(direction) {
+    if (model.checkEligibleToMove(direction)){
+      model.movePiece(direction)
+      controller.resetAndDraw();
+    }
+  },
+
+  gravity: function(){
+    model.moveCellsDown();
+    model.checkCells();
+  },
+
+  checkLegalMove: function(event){
+    if (event.which == 37 || event.which == 39){
+      model.moveSideway(controller.userMove[event.which]);
     }
 
-    view.resetCanvas();
-    view.drawPiece();
-  }
+    if (event.which == 40){
+      model.jumpDown();
+    }
 
+    if (event.which === 38) {
+      model.rotatePiece();
+    }
+  },
 
 }

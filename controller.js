@@ -1,52 +1,37 @@
 var controller = {
   userMove: {
     37: -1,
-    39: 1,
-    40: "down"
+    39: 1
   },
+  isGameOver: false,
 
   init: function(){
+    model.init();
+
     $(document).keydown(function(event){
-      controller.checkLegalMove(event);
+      model.checkLegalMove(event);
     });
+
+    setInterval(controller.gameLoop, 1000)
   },
 
-  gravity: function(){
-    model.moveCellsDown();
-    model.checkCells();
+  resetAndDraw: function(){
+    view.resetCanvas();
+    view.drawPiece();
   },
 
-  movePiece: function(direction){
-    for (var i = model.activeCells.length - 1; i >= 0; i--) {
-      cell = model.activeCells[i]
-      cell.x += direction;
-    }
+  setListener: function(){
+
   },
 
-  checkOutOfBounds: function(){
-    for (var i = 0; i < model.activeCells.length; i++) {
-      cell = model.activeCells[i]
-      if(cell.x < 0){
-       model.rotatePiece(-Math.PI/2)
-       return
-      } else if (cell.x > 9) {
-        model.rotatePiece(-Math.PI/2)
-        return
-      }
-    };
-  },
+  gameLoop: function(){
+   if (!controller.isGameOver) {
+    // console.log("game not over")
 
-  checkLegalMove: function(event){
-    if (event.which == 37 || event.which == 39){
-      model.moveSideway(controller.userMove[event.which]);
-    }
-
-    if (event.which == 40){
-      model.jumpDown();
-    }
-
-    if (event.which === 38) {
-      model.rotatePiece();
-    }
+    view.resetCanvas();
+    model.gravity();
+    if (model.activeCells.length == 0) model.randomFactory(5,-1,0);
   }
+  },
+
 }
